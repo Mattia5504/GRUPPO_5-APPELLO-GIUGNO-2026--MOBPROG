@@ -1,61 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../core/app_constants.dart';
+import '../../state/app_state.dart';
+import 'dashboard/dashboard_screen.dart';
+import 'pantry/pantry_screen.dart';
+import 'planner/planner_screen.dart';
+import 'recipes/recipes_screen.dart';
+import 'shopping/shopping_screen.dart';
 
-class MainShell extends StatelessWidget {
+class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
   @override
+  State<MainShell> createState() => _MainShellState();
+}
+
+class _MainShellState extends State<MainShell> {
+  int _selectedIndex = 0;
+
+  static const List<Widget> _screens = [
+    DashboardScreen(),
+    RecipesScreen(),
+    PantryScreen(),
+    PlannerScreen(),
+    ShoppingScreen(),
+  ];
+
+  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isLoading = context.watch<AppState>().isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppConstants.appName)),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppConstants.appSubtitle,
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Setup iniziale completato. Nelle prossime fasi colleghiamo dati, dashboard e navigazione completa.',
-                style: theme.textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 24),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.eco_outlined,
-                        color: theme.colorScheme.primary,
-                        size: 36,
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(
-                          'PlanEat sta prendendo forma: tema, struttura base e dipendenze sono pronti.',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _screens[_selectedIndex],
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) {
+          setState(() => _selectedIndex = index);
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Home',
           ),
-        ),
+          NavigationDestination(
+            icon: Icon(Icons.menu_book_outlined),
+            selectedIcon: Icon(Icons.menu_book),
+            label: 'Ricette',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.kitchen_outlined),
+            selectedIcon: Icon(Icons.kitchen),
+            label: 'Dispensa',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.calendar_month_outlined),
+            selectedIcon: Icon(Icons.calendar_month),
+            label: 'Planner',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.shopping_basket_outlined),
+            selectedIcon: Icon(Icons.shopping_basket),
+            label: 'Spesa',
+          ),
+        ],
       ),
     );
   }
