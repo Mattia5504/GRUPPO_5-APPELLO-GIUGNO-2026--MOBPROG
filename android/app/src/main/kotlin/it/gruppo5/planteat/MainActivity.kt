@@ -1,4 +1,4 @@
-package com.example.planteat
+package it.gruppo5.planteat
 
 import io.flutter.embedding.android.FlutterActivity
 

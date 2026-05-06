@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/app_constants.dart';
 import '../../../state/app_state.dart';
 import '../../widgets/app_section_header.dart';
 import '../../widgets/app_stat_card.dart';
@@ -38,6 +39,12 @@ class DashboardScreen extends StatelessWidget {
                             ),
                       ),
                     ),
+                    IconButton.filledTonal(
+                      tooltip: 'Info app',
+                      onPressed: () => _showAppInfo(context),
+                      icon: const Icon(Icons.info_outline),
+                    ),
+                    const SizedBox(width: 8),
                     IconButton.filledTonal(
                       tooltip: 'Statistiche',
                       onPressed: () {
@@ -165,6 +172,64 @@ class DashboardScreen extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  void _showAppInfo(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+
+        return AlertDialog(
+          title: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  'assets/branding/planteat_icon.png',
+                  width: 44,
+                  height: 44,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(child: Text(AppConstants.appName)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppConstants.appSubtitle,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                AppConstants.groupName,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              for (final member in AppConstants.groupMembers)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(member),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Chiudi'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

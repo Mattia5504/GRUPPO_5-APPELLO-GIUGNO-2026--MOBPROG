@@ -4,6 +4,14 @@ class AppConstants {
   static const String appName = 'PlanEat';
   static const String appSubtitle = 'Meal Planner & Smart Pantry';
   static const String groupName = 'Gruppo 5';
+  static const String packageId = 'it.gruppo5.planteat';
+
+  static const List<String> groupMembers = [
+    'Mattia Letteriello',
+    'Jonathan Punzo',
+    'Valentino Potapchuk',
+    'Antonia Lamberti',
+  ];
 
   static const List<String> recipeCategories = [
     'Primo',
