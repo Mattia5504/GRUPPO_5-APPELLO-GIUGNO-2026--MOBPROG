@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -19,7 +21,9 @@ class _MainShellState extends State<MainShell> {
   static const int _homeIndex = 2;
 
   late final PageController _pageController;
+  Timer? _navigationUnlockTimer;
   int _selectedIndex = _homeIndex;
+  bool _isNavigationLocked = false;
 
   static const List<Widget> _screens = [
     RecipesScreen(),
@@ -37,6 +41,7 @@ class _MainShellState extends State<MainShell> {
 
   @override
   void dispose() {
+    _navigationUnlockTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -51,8 +56,11 @@ class _MainShellState extends State<MainShell> {
             ? const Center(child: CircularProgressIndicator())
             : PageView(
                 controller: _pageController,
+                physics: _isNavigationLocked
+                    ? const NeverScrollableScrollPhysics()
+                    : const _PlanEatPageScrollPhysics(),
                 onPageChanged: (index) {
-                  setState(() => _selectedIndex = index);
+                  _handlePageChanged(index);
                 },
                 children: _screens,
               ),
@@ -65,17 +73,69 @@ class _MainShellState extends State<MainShell> {
   }
 
   void _animateToPage(int index) {
-    if (index == _selectedIndex) {
+    if (index == _selectedIndex || _isNavigationLocked) {
       return;
     }
 
-    setState(() => _selectedIndex = index);
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 420),
-      curve: Curves.easeOutCubic,
-    );
+    _lockNavigation(const Duration(milliseconds: 560));
+    setState(() {
+      _selectedIndex = index;
+    });
+    _pageController
+        .animateToPage(
+          index,
+          duration: const Duration(milliseconds: 360),
+          curve: Curves.easeOutCubic,
+        )
+        .whenComplete(() {
+          _lockNavigation(const Duration(milliseconds: 220));
+        });
   }
+
+  void _handlePageChanged(int index) {
+    setState(() {
+      _selectedIndex = index;
+      _isNavigationLocked = true;
+    });
+    _scheduleNavigationUnlock(const Duration(milliseconds: 260));
+  }
+
+  void _lockNavigation(Duration duration) {
+    setState(() {
+      _isNavigationLocked = true;
+    });
+    _scheduleNavigationUnlock(duration);
+  }
+
+  void _scheduleNavigationUnlock(Duration duration) {
+    _navigationUnlockTimer?.cancel();
+    _navigationUnlockTimer = Timer(duration, () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isNavigationLocked = false;
+      });
+    });
+  }
+}
+
+class _PlanEatPageScrollPhysics extends PageScrollPhysics {
+  const _PlanEatPageScrollPhysics({super.parent});
+
+  @override
+  _PlanEatPageScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _PlanEatPageScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double? get dragStartDistanceMotionThreshold => 26;
+
+  @override
+  double get minFlingDistance => 96;
+
+  @override
+  double get minFlingVelocity => 900;
 }
 
 class _PlanEatBottomNav extends StatelessWidget {
